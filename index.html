@@ -1,1 +1,52 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ultimate Clicker</title>
+<style>
+body { font-family: Arial; text-align: center; background:#111; color:#0ff; }
+h1 { text-shadow:0 0 15px #0ff; }
+button { padding:12px 25px; margin:5px; font-size:16px; cursor:pointer; border:none; border-radius:8px; background:#1e1e2f; color:#0ff; transition:0.2s; }
+button:hover { background:#0ff; color:black; transform:scale(1.1);}
+.stats { margin-bottom:20px; }
+.floating { position:absolute; color:#0f0; font-weight:bold; pointer-events:none; animation:floatUp 1s ease-out forwards;}
+@keyframes floatUp { from {opacity:1; transform:translateY(0);} to {opacity:0; transform:translateY(-60px);} }
+</style>
+</head>
+<body>
+<h1>Ultimate Clicker</h1>
+<div class="stats">
+<h2>Money: $<span id="money">0</span></h2>
+<p>Per Click: $<span id="perClick">1</span></p>
+<p>Auto Income: $<span id="autoIncome">0</span>/sec</p>
+<p>Prestige x<span id="prestigeMulti">1</span></p>
+</div>
+<button id="clickBtn">CLICK</button>
+<h3>Upgrades</h3>
+<button onclick="buyClick()">Upgrade Click ($<span id="clickCost">10</span>)</button>
+<button onclick="buyAuto()">Auto Income ($<span id="autoCost">50</span>)</button>
+<button onclick="buyMega()">Mega Multiplier ($<span id="megaCost">250</span>)</button>
+<br><br>
+<button onclick="prestige()">Prestige ($10,000)</button>
+<br><br>
+<button onclick="resetGame()">Reset Game</button>
+<script>
+let money=0, perClick=1, autoIncome=0, prestigeMultiplier=1;
+let clickCost=10, autoCost=50, megaCost=250;
+const moneyEl=document.getElementById("money"), perClickEl=document.getElementById("perClick"), autoIncomeEl=document.getElementById("autoIncome"), prestigeEl=document.getElementById("prestigeMulti");
+const clickCostEl=document.getElementById("clickCost"), autoCostEl=document.getElementById("autoCost"), megaCostEl=document.getElementById("megaCost");
+document.getElementById("clickBtn").addEventListener("click", e=>{ money+=perClick*prestigeMultiplier; createFloatingText(e.pageX,e.pageY,"+"+(perClick*prestigeMultiplier)); update(); });
+function buyClick(){ if(money>=clickCost){ money-=clickCost; perClick+=1; clickCost=Math.floor(clickCost*1.6); update(); } }
+function buyAuto(){ if(money>=autoCost){ money-=autoCost; autoIncome+=1; autoCost=Math.floor(autoCost*1.8); update(); } }
+function buyMega(){ if(money>=megaCost){ money-=megaCost; perClick*=2; autoIncome*=2; megaCost=Math.floor(megaCost*2.2); update(); } }
+function prestige(){ if(money>=10000){ prestigeMultiplier+=1; money=0; perClick=1; autoIncome=0; clickCost=10; autoCost=50; megaCost=250; update(); } }
+setInterval(()=>{ money+=autoIncome*prestigeMultiplier; update(); },1000);
+function update(){ moneyEl.textContent=Math.floor(money); perClickEl.textContent=perClick; autoIncomeEl.textContent=autoIncome; prestigeEl.textContent=prestigeMultiplier; clickCostEl.textContent=clickCost; autoCostEl.textContent=autoCost; megaCostEl.textContent=megaCost; saveGame(); }
+function createFloatingText(x,y,text){ let el=document.createElement("div"); el.className="floating"; el.style.left=x+"px"; el.style.top=y+"px"; el.innerText=text; document.body.appendChild(el); setTimeout(()=>el.remove(),1000);}
+function saveGame(){ localStorage.setItem("clickerSave",JSON.stringify({money,perClick,autoIncome,prestigeMultiplier,clickCost,autoCost,megaCost}));}
+function loadGame(){ let save=JSON.parse(localStorage.getItem("clickerSave")); if(save){ Object.assign(window,save); update(); } }
+function resetGame(){ localStorage.removeItem("clickerSave"); location.reload(); }
+loadGame(); update();
+</script>
+</body>
+</html>
